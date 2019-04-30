@@ -4,35 +4,25 @@ import (
 	"fmt"
 	"sort"
 
-	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
 type Find struct {
 	Key    int
 	Remove bool
-	Id     int
-	Token  string
 }
 type Add struct {
 	Key   int
 	Value string
-	Id    int
-	Token string
 }
 type Delete struct {
-	Id    int
-	Token string
 }
 type Traverse struct {
 	Pairs  map[int]string
 	Caller *NodeActor
-	Id     int
-	Token  string
 }
 
 type NodeActor struct {
-	Token      string
 	Id         int
 	LeafSize   int
 	LeftNode   *NodeActor
@@ -42,9 +32,6 @@ type NodeActor struct {
 }
 
 func (state *NodeActor) Receive(context actor.Context) {
-	if context.Message().Token != state.Token || context.Message().Id != state.Id {
-		// send error
-	}
 
 	switch msg := context.Message().(type) {
 	case *Find:
