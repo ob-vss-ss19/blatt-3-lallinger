@@ -3,23 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/ob-vss-ss19/blatt-3-lallinger/messages"
 	"sync"
 	"time"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
-	"github.com/ob-vss-ss19/blatt-3-lallinger/tree/"
 	"github.com/ob-vss-ss19/ob-vss-ss19/proto.actor/echomessages"
 )
 
-type MyActor struct {
+type CliActor struct {
 	count int
 	wg    *sync.WaitGroup
 }
 
-func (state *MyActor) Receive(context actor.Context) {
+func (state *CliActor) Receive(context actor.Context) {
 	switch context.Message().(type) {
-	case *echomessages.Response:
+	case *messages.Response:
 		state.count++
 		fmt.Println(state.count)
 	case *actor.Stopped:
@@ -46,7 +46,7 @@ func main() {
 	var wg sync.WaitGroup
 	props := actor.PropsFromProducer(func() actor.Actor {
 		wg.Add(1)
-		return &MyActor{0, &wg}
+		return &CliActor{0, &wg}
 	})
 	rootContext := actor.EmptyRootContext
 	pid := rootContext.Spawn(props)
