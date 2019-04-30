@@ -32,7 +32,6 @@ type NodeActor struct {
 }
 
 func (state *NodeActor) Receive(context actor.Context) {
-
 	switch msg := context.Message().(type) {
 	case *Find:
 		if len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
@@ -60,6 +59,9 @@ func (state *NodeActor) Receive(context actor.Context) {
 	case *Add:
 		if len(state.Values) < state.LeafSize && state.LeftNode == nil && state.RightNode == nil {
 			// add key to leaf
+			if state.Values == nil {
+				state.Values = make(map[int]string)
+			}
 			state.Values[msg.Key] = msg.Value
 			fmt.Printf("added %v\n", msg.Value)
 		} else if len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
