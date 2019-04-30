@@ -7,26 +7,12 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type hello struct{ who string }
-type goodbye struct{ until string }
-type helloActor struct{}
-
-func (state *helloActor) Receive(context actor.Context) {
-	switch msg := context.Message().(type) {
-	case *hello:
-		fmt.Printf("Hello %v\n", msg.who)
-	case *goodbye:
-		fmt.Printf("ok cu %v\n", msg.until)
-	}
-}
-
 func main() {
 	context := actor.EmptyRootContext
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return &helloActor{}
+		return &NodeActor{Token: "a", Id: 1}
 	})
 	pid := context.Spawn(props)
-	context.Send(pid, &hello{who: "Roger"})
-	context.Send(pid, &goodbye{until: "Tomorrow"})
+	context.Send(pid, &add{value: "hallo", Key: 4, id: 1, token: "a"})
 	console.ReadLine() // nolint:errcheck
 }
