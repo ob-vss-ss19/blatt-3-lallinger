@@ -9,9 +9,10 @@ import (
 func main() {
 	context := actor.EmptyRootContext
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return &tree.NodeActor{Id: 1}
+		return &tree.NodeActor{Id: 1, LeafSize: 2} // nolint:errcheck
 	})
 	pid := context.Spawn(props)
 	context.Send(pid, &tree.Add{Value: "hallo", Key: 4})
+	context.Send(pid, &tree.Find{Key: 4})
 	console.ReadLine() // nolint:errcheck
 }

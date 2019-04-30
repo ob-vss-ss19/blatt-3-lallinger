@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -63,7 +62,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 				state.Values = make(map[int]string)
 			}
 			state.Values[msg.Key] = msg.Value
-			fmt.Printf("added %v\n", msg.Value)
+
 		} else if len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
 			// not a leaf
 			if msg.Key <= state.LeftMaxKey {
