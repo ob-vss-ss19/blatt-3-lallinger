@@ -35,35 +35,35 @@ func (state *ServiceActor) Receive(context actor.Context) {
 		case messages.Usage_ADD:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
-				invalidAcess()
+				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Add{Key: int(msg.Key), Value: msg.Value})
 		case messages.Usage_FIND:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
-				invalidAcess()
+				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Find{Key: int(msg.Key), Caller: context.Sender()})
 		case messages.Usage_REMOVE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
-				invalidAcess()
+				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Find{Key: int(msg.Key), Remove: true})
 		case messages.Usage_TRAVERSE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
-				invalidAcess()
+				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Traverse{Caller: context.Sender(), Start: pid})
 		case messages.Usage_DELETE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
-				invalidAcess()
+				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Delete{CurrentNode: pid})
@@ -81,12 +81,12 @@ func getPID(id int32, token string) *actor.PID {
 	return nil
 }
 
-func invalidAcess(pid actor.PID) {
-
+func invalidAcess(pid *actor.PID) {
+	context.Send(pid, &messages.Error{})
 }
 
 func NewMyActor() actor.Actor {
-	log.Message("Hello-Actor is up and running")
+	log.Message("Service-Actor is up and running")
 	return &ServiceActor{}
 }
 
@@ -102,7 +102,7 @@ func main() {
 	flag.Parse()
 	remote.Start(*flagBind)
 
-	remote.Register("hello", actor.PropsFromProducer(NewMyActor))
+	remote.Register("treeService", actor.PropsFromProducer(NewMyActor))
 
 	/*
 		props := actor.PropsFromProducer(func() actor.Actor {

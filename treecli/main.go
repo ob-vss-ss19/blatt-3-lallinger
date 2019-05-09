@@ -4,26 +4,24 @@ import (
 	"flag"
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/messages"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/remote"
-	"github.com/ob-vss-ss19/ob-vss-ss19/proto.actor/echomessages"
 )
 
 type CliActor struct {
-	count int
-	wg    *sync.WaitGroup
 }
 
 func (state *CliActor) Receive(context actor.Context) {
-	switch context.Message().(type) {
+	switch msg := context.Message().(type) {
 	case *messages.Response:
-		state.count++
-		fmt.Println(state.count)
-	case *actor.Stopped:
-		state.wg.Done()
+
+		fmt.Println("")
+	case *messages.Traverse:
+	case *messages.Error:
 	}
 }
 
@@ -38,38 +36,28 @@ var id = flag.Int("id", -1, "tree id")
 var token = flag.String("token", "", "tree token")
 var forceDelete = flag.Bool("no-preserve-tree", false, "force deletion of tree")
 
+var rootContext = actor.EmptyRootContext
+var pid *actor.PID
+var remotePid *actor.PID
+var wg sync.WaitGroup
+
 func main() {
 
 	flag.Parse()
 
 	remote.Start(*flagBind)
-	var wg sync.WaitGroup
+
 	props := actor.PropsFromProducer(func() actor.Actor {
 		wg.Add(1)
-		return &CliActor{0, &wg}
+		return &CliActor{}
 	})
-	rootContext := actor.EmptyRootContext
-	pid := rootContext.Spawn(props)
-	message := &echomessages.Echo{Message: "hej"}
+	pid = rootContext.Spawn(props)
 
-	fmt.Println("Sleeping 5 seconds...")
-	time.Sleep(5 * time.Second)
-	fmt.Println("Awake...")
-
-	//this is the remote actor we want to communicate with
-	fmt.Printf("Trying to connect to %s\n", *flagRemote)
-
-	pidResp, err := remote.SpawnNamed(*flagRemote, "remote", "hello", 5*time.Second)
+	pidResp, err := remote.SpawnNamed(*flagRemote, "remote", "treeService", 5*time.Second)
 	if err != nil {
 		panic(err)
 	}
-	remotePid := pidResp.Pid
-
-	for i := 0; i < 10; i++ {
-		rootContext.RequestWithCustomSender(remotePid, message, pid)
-	}
-
-	wg.Wait()
+	remotePid = pidResp.Pid
 
 	switch flag.Args()[0] {
 	case "newtree":
@@ -100,6 +88,8 @@ func newTree() {
 		error()
 		return
 	}
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_CREATE}, pid)
+	wg.Wait()
 }
 
 func insert() {
@@ -107,6 +97,8 @@ func insert() {
 		error()
 		return
 	}
+	tmp, _ := strconv.Atoi(flag.Args()[1])
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_ADD, Key: int32(tmp), Value: flag.Args()[2], Token: *token, Id: int32(*id)}, pid)
 }
 
 func search() {
@@ -114,6 +106,9 @@ func search() {
 		error()
 		return
 	}
+	tmp, _ := strconv.Atoi(flag.Args()[1])
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_FIND, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
+	wg.Wait()
 }
 
 func remove() {
@@ -121,6 +116,8 @@ func remove() {
 		error()
 		return
 	}
+	tmp, _ := strconv.Atoi(flag.Args()[1])
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_REMOVE, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
 }
 
 func delete() {
@@ -133,6 +130,7 @@ func delete() {
 		error()
 		return
 	}
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_DELETE, Token: *token, Id: int32(*id)}, pid)
 }
 
 func traverse() {
@@ -140,6 +138,8 @@ func traverse() {
 		error()
 		return
 	}
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_TRAVERSE, Token: *token, Id: int32(*id)}, pid)
+	wg.Wait()
 }
 
 func error() {
