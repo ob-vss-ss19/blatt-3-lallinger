@@ -45,8 +45,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				invalidAcess()
 				return
 			}
-			context.Send(pid, &tree.Find{})
-			context.Send(pid, &tree.Find{Key: int(msg.Key)})
+			context.Send(pid, &tree.Find{Key: int(msg.Key), Caller: context.Sender()})
 		case messages.Usage_REMOVE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
@@ -60,14 +59,14 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				invalidAcess()
 				return
 			}
-			context.Send(pid, &tree.Traverse{})
+			context.Send(pid, &tree.Traverse{Caller: context.Sender(), Start: pid})
 		case messages.Usage_DELETE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
 				invalidAcess()
 				return
 			}
-			context.Send(pid, &tree.Delete{})
+			context.Send(pid, &tree.Delete{CurrentNode: pid})
 		default:
 		}
 	default: // just for linter
@@ -82,7 +81,7 @@ func getPID(id int32, token string) *actor.PID {
 	return nil
 }
 
-func invalidAcess() {
+func invalidAcess(pid actor.PID) {
 
 }
 
@@ -116,7 +115,7 @@ func main() {
 }
 
 func nextId() int32 {
-	return 1
+	return int32(len(trees))
 }
 
 func newToken() string {

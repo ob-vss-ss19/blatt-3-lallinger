@@ -20,12 +20,12 @@ type Delete struct {
 	CurrentNode *actor.PID
 }
 
-type keyValuePair struct {
+type KeyValuePair struct {
 	Key   int
 	Value string
 }
 type Traverse struct {
-	Values         []keyValuePair
+	Values         []KeyValuePair
 	RemainingNodes []*actor.PID
 	Caller         *actor.PID
 	Start          *actor.PID
@@ -59,7 +59,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 					delete(state.Values, msg.Key)
 				} else {
 					// return value
-					context.Send(msg.caller, &messages.Response{Value: tmp})
+					context.Send(msg.Caller, &messages.Response{Value: tmp})
 				}
 			} else {
 				// return error
@@ -104,12 +104,12 @@ func (state *NodeActor) Receive(context actor.Context) {
 		}
 
 	case *Traverse:
-		if msg.start != nil {
+		if msg.Start != nil {
 			// set root node as start node for traverse
-			msg.values = make([]keyValuePair, 0)
-			msg.remainingNodes = make([]*actor.PID, 1)
-			tmp := msg.start
-			msg.start = nil
+			msg.Values = make([]KeyValuePair, 0)
+			msg.RemainingNodes = make([]*actor.PID, 1)
+			tmp := msg.Start
+			msg.Start = nil
 			if len(state.Values) != 0 && state.LeftNode == nil && state.RightNode == nil {
 				// if root is leaf create slices and set start to nil
 				context.Send(tmp, msg)
@@ -117,40 +117,47 @@ func (state *NodeActor) Receive(context actor.Context) {
 			}
 
 			// if root is node create slices, set start to nil, add right node to remaining and forward
-			msg.remainingNodes = append(msg.remainingNodes, state.RightNode)
+			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
 			context.Send(state.LeftNode, msg)
 			return
 		}
 
-		if len(msg.remainingNodes) != 0 && len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
+		if len(msg.RemainingNodes) != 0 && len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
 			// node is not leaf
 			// while remaining nodes add right node to remaining and sends to left node
-			msg.remainingNodes = append(msg.remainingNodes, state.RightNode)
+			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
 			context.Send(state.LeftNode, msg)
 		}
 
-		if len(msg.remainingNodes) != 0 && state.LeftNode == nil && state.RightNode == nil {
+		if len(msg.RemainingNodes) != 0 && state.LeftNode == nil && state.RightNode == nil {
 			// leaf with remaining nodes to traverse
 			for key := range sortKeys(state.Values) {
-				msg.values = append(msg.values, keyValuePair{key, state.Values[key]})
+				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
-			next := msg.remainingNodes[len(msg.remainingNodes)-1]
-			msg.remainingNodes = msg.remainingNodes[:len(msg.remainingNodes)-2]
+			next := msg.RemainingNodes[len(msg.RemainingNodes)-1]
+			msg.RemainingNodes = msg.RemainingNodes[:len(msg.RemainingNodes)-2]
 			context.Send(next, msg)
 		}
 
-		if len(msg.remainingNodes) == 0 && state.LeftNode == nil && state.RightNode == nil {
+		if len(msg.RemainingNodes) == 0 && state.LeftNode == nil && state.RightNode == nil {
 			// leaf with no remaining nodes to traverse
 			for key := range sortKeys(state.Values) {
-				msg.values = append(msg.values, keyValuePair{key, state.Values[key]})
+				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
-			context.Send(msg.caller, msg)
+
+			var response []*messages.Response
+			response = make([]*messages.Response, len(msg.Values))
+
+			for i, pair := range msg.Values {
+				response[i] = &messages.Response{Value: pair.Value, Key: int32(pair.Key)}
+			}
+			context.Send(msg.Caller, messages.Traverse{Values: response})
 		}
 
 	case *Delete:
-		context.Send(state.LeftNode, &Delete{currentNode: state.LeftNode})
-		context.Send(state.RightNode, &Delete{currentNode: state.RightNode})
-		context.Stop(msg.currentNode)
+		context.Send(state.LeftNode, &Delete{CurrentNode: state.LeftNode})
+		context.Send(state.RightNode, &Delete{CurrentNode: state.RightNode})
+		context.Stop(msg.CurrentNode)
 	}
 }
 

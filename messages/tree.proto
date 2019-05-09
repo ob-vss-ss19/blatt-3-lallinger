@@ -28,3 +28,7 @@ message Response {
 message Traverse {
     repeated Response values = 1;
 }
+
+message Error {
+
+}
