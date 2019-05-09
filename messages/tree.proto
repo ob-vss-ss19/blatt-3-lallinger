@@ -30,6 +30,6 @@ message Traverse {
     repeated Response Values = 1;
 }
 
-message Error {
+message ErrorResponse {
 
 }

@@ -82,19 +82,19 @@ func main() {
 		remove()
 		return
 	case "delete":
-		delete()
+		deleteTree()
 		return
 	case "traverse":
 		traverse()
 		return
 	default:
-		error()
+		printError()
 	}
 }
 
 func newTree() {
 	if len(flag.Args()) > 1 {
-		error()
+		printError()
 		return
 	}
 
@@ -107,7 +107,7 @@ func newTree() {
 
 func insert() {
 	if len(flag.Args()) != 3 || *id == -1 || *token == "" {
-		error()
+		printError()
 		return
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
@@ -116,7 +116,7 @@ func insert() {
 
 func search() {
 	if len(flag.Args()) != 2 || *id == -1 || *token == "" {
-		error()
+		printError()
 		return
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
@@ -126,21 +126,21 @@ func search() {
 
 func remove() {
 	if len(flag.Args()) != 2 || *id == -1 || *token == "" {
-		error()
+		printError()
 		return
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_REMOVE, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
 }
 
-func delete() {
+func deleteTree() {
 	if !*forceDelete {
 		fmt.Println("Specify no-preserve-tree for tree deletion")
 		return
 	}
 
 	if len(flag.Args()) > 1 || *id == -1 || *token == "" {
-		error()
+		printError()
 		return
 	}
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_DELETE, Token: *token, Id: int32(*id)}, pid)
@@ -148,13 +148,13 @@ func delete() {
 
 func traverse() {
 	if len(flag.Args()) > 1 || *id == -1 || *token == "" {
-		error()
+		printError()
 		return
 	}
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_TRAVERSE, Token: *token, Id: int32(*id)}, pid)
 	wg.Wait()
 }
 
-func error() {
+func printError() {
 	fmt.Println("Invalid arguments")
 }
