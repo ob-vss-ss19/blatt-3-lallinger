@@ -12,22 +12,22 @@ enum Usage {
 
 
 message Request {
-    string token = 1;
-    int32 id = 2;
-    Usage type = 3;
-    int32 key = 4;
-    string value = 5;
+    string Token = 1;
+    int32 Id = 2;
+    Usage Type = 3;
+    int32 Key = 4;
+    string Value = 5;
 }
 
 message Response {
-    int32 key = 1;
-    string value = 2;
-    Usage type = 3;
+    int32 Key = 1;
+    string Value = 2;
+    Usage Type = 3;
 }
 
 
 message Traverse {
-    repeated Response values = 1;
+    repeated Response Values = 1;
 }
 
 message Error {

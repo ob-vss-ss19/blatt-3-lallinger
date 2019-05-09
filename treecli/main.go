@@ -13,7 +13,6 @@ import (
 )
 
 type CliActor struct {
-	wg *sync.WaitGroup
 }
 
 func (state *CliActor) Receive(context actor.Context) {
@@ -37,7 +36,7 @@ var id = flag.Int("id", -1, "tree id")
 var token = flag.String("token", "", "tree token")
 var forceDelete = flag.Bool("no-preserve-tree", false, "force deletion of tree")
 
-var rootContext = actor.EmptyRootContext
+var rootContext *actor.RootContext
 var pid *actor.PID
 var remotePid *actor.PID
 var wg sync.WaitGroup
@@ -50,17 +49,24 @@ func main() {
 
 	props := actor.PropsFromProducer(func() actor.Actor {
 		wg.Add(1)
-		return &CliActor{wg: &wg}
+		return &CliActor{}
 	})
+	rootContext = actor.EmptyRootContext
 	pid = rootContext.Spawn(props)
+
+	message := &messages.Error{}
 
 	time.Sleep(5 * time.Second)
 
-	pidResp, err := remote.SpawnNamed(*flagRemote, "treeService", "remote", 5*time.Second)
+	pidResp, err := remote.SpawnNamed(*flagRemote, "remote", "treeService", 5*time.Second)
 	if err != nil {
 		panic(err)
 	}
 	remotePid = pidResp.Pid
+
+	rootContext.RequestWithCustomSender(remotePid, message, pid)
+
+	wg.Wait()
 
 	switch flag.Args()[0] {
 	case "newtree":
@@ -91,7 +97,11 @@ func newTree() {
 		error()
 		return
 	}
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_CREATE}, pid)
+
+	message := &messages.Error{}
+
+	rootContext.RequestWithCustomSender(remotePid, message, pid)
+	//rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_CREATE}, pid)
 	wg.Wait()
 }
 

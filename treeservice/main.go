@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/messages"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/tree"
 	"sync"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
-	"github.com/AsynkronIT/protoactor-go/log"
 	"github.com/AsynkronIT/protoactor-go/remote"
 )
 
@@ -69,6 +69,8 @@ func (state *ServiceActor) Receive(context actor.Context) {
 			context.Send(pid, &tree.Delete{CurrentNode: pid})
 		default:
 		}
+	case messages.Error:
+		fmt.Println("error arrived")
 	default: // just for linter
 	}
 }
@@ -86,7 +88,7 @@ func invalidAcess(pid *actor.PID) {
 }
 
 func NewMyActor() actor.Actor {
-	log.Message("Service-Actor is up and running")
+	fmt.Println("Service-Actor is up and running")
 	return &ServiceActor{}
 }
 
