@@ -15,6 +15,8 @@ message Request {
     string token = 1;
     int32 id = 2;
     Usage type = 3;
+    int32 key = 4;
+    string value = 5;
 }
 
 message Response {

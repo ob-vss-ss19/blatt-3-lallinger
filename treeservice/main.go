@@ -15,39 +15,75 @@ import (
 type ServiceActor struct{}
 
 var context = actor.EmptyRootContext
-var trees = make(map[int]map[string]*actor.PID)
+var trees = make(map[int32]map[string]*actor.PID)
 
 func (state *ServiceActor) Receive(context actor.Context) {
+
 	switch msg := context.Message().(type) {
 	case *messages.Request:
-
 		switch msg.Type {
 		case messages.Usage_CREATE:
-
 			id := nextId()
 			token := newToken()
 
 			props := actor.PropsFromProducer(func() actor.Actor {
-				return &tree.NodeActor{Id: id, LeafSize: int(msg.Id)}
+				return &tree.NodeActor{LeafSize: int(msg.Id)}
 			})
 			pid := context.Spawn(props)
 			trees[id][token] = pid
 			context.Respond(&messages.Response{Key: int32(id), Value: token})
 
 		case messages.Usage_ADD:
+			pid := getPID(msg.Id, msg.Token)
+			if pid == nil {
+				invalidAcess()
+				return
+			}
+			context.Send(pid, &tree.Add{Key: int(msg.Key), Value: msg.Value})
 		case messages.Usage_FIND:
+			pid := getPID(msg.Id, msg.Token)
+			if pid == nil {
+				invalidAcess()
+				return
+			}
+			context.Send(pid, &tree.Find{Key: int(msg.Key)})
 		case messages.Usage_REMOVE:
+			pid := getPID(msg.Id, msg.Token)
+			if pid == nil {
+				invalidAcess()
+				return
+			}
+			context.Send(pid, &tree.Find{Key: int(msg.Key), Remove: true})
 		case messages.Usage_TRAVERSE:
+			pid := getPID(msg.Id, msg.Token)
+			if pid == nil {
+				invalidAcess()
+				return
+			}
+			context.Send(pid, &tree.Traverse{})
 		case messages.Usage_DELETE:
+			pid := getPID(msg.Id, msg.Token)
+			if pid == nil {
+				invalidAcess()
+				return
+			}
+			context.Send(pid, &tree.Delete{})
 		default:
-
 		}
-
-		context.Respond(&messages.Response{
-			Key: 1,
-		})
 	default: // just for linter
 	}
+}
+
+func getPID(id int32, token string) *actor.PID {
+	tmp := trees[id][token]
+	if tmp != nil {
+		return tmp
+	}
+	return nil
+}
+
+func invalidAcess() {
+
 }
 
 func NewMyActor() actor.Actor {
@@ -79,7 +115,7 @@ func main() {
 		console.ReadLine() // nolint:errcheck*/
 }
 
-func nextId() int {
+func nextId() int32 {
 	return 1
 }
 
