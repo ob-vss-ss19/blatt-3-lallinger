@@ -13,24 +13,25 @@ import (
 )
 
 type CliActor struct {
+	wg *sync.WaitGroup
 }
 
 func (state *CliActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.Response:
+		if msg.Type == messages.Usage_CREATE {
+			fmt.Println("Token: %s", msg.Value)
+			fmt.Println("Id: %d", msg.Key)
+		}
 
-		fmt.Println("")
 	case *messages.Traverse:
 	case *messages.Error:
 	}
 }
 
-var (
-	// nolint:gochecknoglobals
-	flagBind = flag.String("bind", "localhost:8090", "Bind to address")
-	// nolint:gochecknoglobals
-	flagRemote = flag.String("remote", "localhost:8091", "remote host:port")
-)
+var flagBind = flag.String("bind", "localhost:8092", "Bind to address")
+
+var flagRemote = flag.String("remote", "127.0.0.1:8091", "remote host:port")
 
 var id = flag.Int("id", -1, "tree id")
 var token = flag.String("token", "", "tree token")
@@ -49,11 +50,13 @@ func main() {
 
 	props := actor.PropsFromProducer(func() actor.Actor {
 		wg.Add(1)
-		return &CliActor{}
+		return &CliActor{wg: &wg}
 	})
 	pid = rootContext.Spawn(props)
 
-	pidResp, err := remote.SpawnNamed(*flagRemote, "remote", "treeService", 5*time.Second)
+	time.Sleep(5 * time.Second)
+
+	pidResp, err := remote.SpawnNamed(*flagRemote, "treeService", "remote", 5*time.Second)
 	if err != nil {
 		panic(err)
 	}

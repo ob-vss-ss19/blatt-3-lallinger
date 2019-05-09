@@ -101,7 +101,6 @@ func main() {
 
 	flag.Parse()
 	remote.Start(*flagBind)
-
 	remote.Register("treeService", actor.PropsFromProducer(NewMyActor))
 
 	/*
