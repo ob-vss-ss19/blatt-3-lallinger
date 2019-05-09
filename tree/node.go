@@ -10,14 +10,14 @@ import (
 type Find struct {
 	Key    int
 	Remove bool
-	caller *actor.PID
+	Caller *actor.PID
 }
 type Add struct {
 	Key   int
 	Value string
 }
 type Delete struct {
-	currentNode *actor.PID
+	CurrentNode *actor.PID
 }
 
 type keyValuePair struct {
@@ -25,10 +25,10 @@ type keyValuePair struct {
 	Value string
 }
 type Traverse struct {
-	values         []keyValuePair
-	remainingNodes []*actor.PID
-	caller         *actor.PID
-	start          *actor.PID
+	Values         []keyValuePair
+	RemainingNodes []*actor.PID
+	Caller         *actor.PID
+	Start          *actor.PID
 }
 
 type NodeActor struct {

@@ -9,7 +9,6 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/AsynkronIT/protoactor-go/log"
 	"github.com/AsynkronIT/protoactor-go/remote"
-	_ "github.com/ob-vss-ss19/blatt-3-lallinger/tree"
 )
 
 type ServiceActor struct{}
@@ -46,6 +45,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				invalidAcess()
 				return
 			}
+			context.Send(pid, &tree.Find{})
 			context.Send(pid, &tree.Find{Key: int(msg.Key)})
 		case messages.Usage_REMOVE:
 			pid := getPID(msg.Id, msg.Token)
