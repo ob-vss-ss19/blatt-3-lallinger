@@ -62,7 +62,8 @@ func (state *NodeActor) Receive(context actor.Context) {
 					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND})
 				}
 			} else {
-				// return error
+				// return error key not found
+				context.Send(msg.Caller, &messages.Error{})
 			}
 		} else {
 			// undefined send error
