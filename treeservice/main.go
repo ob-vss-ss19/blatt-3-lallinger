@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"flag"
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/messages"
@@ -21,7 +22,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.Request:
 		switch msg.Type {
-		case messages.Usage_CREATE:
+		case messages.CREATE:
 			id := nextId()
 			token := newToken()
 
@@ -29,38 +30,39 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				return &tree.NodeActor{LeafSize: int(msg.Id)}
 			})
 			pid := context.Spawn(props)
+			trees[id] = make(map[string]*actor.PID)
 			trees[id][token] = pid
-			context.Respond(&messages.Response{Key: int32(id), Value: token})
+			context.Respond(&messages.Response{Key: int32(id), Value: token, Type: messages.CREATE})
 
-		case messages.Usage_ADD:
+		case messages.ADD:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
 				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Add{Key: int(msg.Key), Value: msg.Value})
-		case messages.Usage_FIND:
+		case messages.FIND:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
 				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Find{Key: int(msg.Key), Caller: context.Sender()})
-		case messages.Usage_REMOVE:
+		case messages.REMOVE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
 				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Find{Key: int(msg.Key), Remove: true})
-		case messages.Usage_TRAVERSE:
+		case messages.TRAVERSE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
 				invalidAcess(context.Sender())
 				return
 			}
 			context.Send(pid, &tree.Traverse{Caller: context.Sender(), Start: pid})
-		case messages.Usage_DELETE:
+		case messages.DELETE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
 				invalidAcess(context.Sender())
@@ -82,7 +84,7 @@ func getPID(id int32, token string) *actor.PID {
 }
 
 func invalidAcess(pid *actor.PID) {
-	context.Send(pid, &messages.ErrorResponse{})
+	context.Send(pid, &messages.Error{})
 }
 
 func NewMyActor() actor.Actor {
@@ -102,15 +104,6 @@ func main() {
 	remote.Start(*flagBind)
 	remote.Register("treeService", actor.PropsFromProducer(NewMyActor))
 	wg.Wait()
-
-	/*
-		props := actor.PropsFromProducer(func() actor.Actor {
-			return &tree.NodeActor{Id: 1, LeafSize: 2} // nolint:errcheck
-		})
-		pid := context.Spawn(props)
-		context.Send(pid, &tree.Add{Value: "hallo", Key: 4})
-		context.Send(pid, &tree.Find{Key: 4})
-		console.ReadLine() // nolint:errcheck*/
 }
 
 func nextId() int32 {
@@ -118,5 +111,7 @@ func nextId() int32 {
 }
 
 func newToken() string {
-	return "a"
+	b := make([]byte, 4)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)
 }

@@ -18,13 +18,19 @@ type CliActor struct {
 func (state *CliActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *messages.Response:
-		if msg.Type == messages.Usage_CREATE {
-			fmt.Println("Token: %s", msg.Value)
-			fmt.Println("Id: %d", msg.Key)
+		switch msg.Type {
+		case messages.CREATE:
+			fmt.Printf("Token: %s\n", msg.Value)
+			fmt.Printf("Id: %d\n", msg.Key)
+			wg.Done()
+		case messages.FIND:
+		case messages.TRAVERSE:
 		}
 
 	case *messages.Traverse:
-	case *messages.ErrorResponse:
+	case *messages.Error:
+		fmt.Printf("An error occured!\n")
+		wg.Done()
 	}
 }
 
@@ -92,7 +98,7 @@ func newTree() {
 		return
 	}
 
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_CREATE}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.CREATE}, pid)
 	wg.Wait()
 }
 
@@ -102,7 +108,7 @@ func insert() {
 		return
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_ADD, Key: int32(tmp), Value: flag.Args()[2], Token: *token, Id: int32(*id)}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.ADD, Key: int32(tmp), Value: flag.Args()[2], Token: *token, Id: int32(*id)}, pid)
 }
 
 func search() {
@@ -111,7 +117,7 @@ func search() {
 		return
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_FIND, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.FIND, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
 	wg.Wait()
 }
 
@@ -121,7 +127,7 @@ func remove() {
 		return
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_REMOVE, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.REMOVE, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
 }
 
 func deleteTree() {
@@ -134,7 +140,7 @@ func deleteTree() {
 		printError()
 		return
 	}
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_DELETE, Token: *token, Id: int32(*id)}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.DELETE, Token: *token, Id: int32(*id)}, pid)
 }
 
 func traverse() {
@@ -142,7 +148,7 @@ func traverse() {
 		printError()
 		return
 	}
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_TRAVERSE, Token: *token, Id: int32(*id)}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.TRAVERSE, Token: *token, Id: int32(*id)}, pid)
 	wg.Wait()
 }
 

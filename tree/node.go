@@ -59,7 +59,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 					delete(state.Values, msg.Key)
 				} else {
 					// return value
-					context.Send(msg.Caller, &messages.Response{Value: tmp})
+					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND})
 				}
 			} else {
 				// return error
@@ -149,7 +149,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			response = make([]*messages.Response, len(msg.Values))
 
 			for i, pair := range msg.Values {
-				response[i] = &messages.Response{Value: pair.Value, Key: int32(pair.Key)}
+				response[i] = &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE}
 			}
 			context.Send(msg.Caller, messages.Traverse{Values: response})
 		}
