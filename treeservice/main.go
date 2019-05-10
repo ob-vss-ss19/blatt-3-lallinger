@@ -69,8 +69,6 @@ func (state *ServiceActor) Receive(context actor.Context) {
 			context.Send(pid, &tree.Delete{CurrentNode: pid})
 		default:
 		}
-	case messages.Error:
-		fmt.Println("error arrived")
 	default: // just for linter
 	}
 }
@@ -84,7 +82,7 @@ func getPID(id int32, token string) *actor.PID {
 }
 
 func invalidAcess(pid *actor.PID) {
-	context.Send(pid, &messages.Error{})
+	context.Send(pid, &messages.ErrorResponse{})
 }
 
 func NewMyActor() actor.Actor {
@@ -99,11 +97,11 @@ func main() {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	defer wg.Wait()
 
 	flag.Parse()
 	remote.Start(*flagBind)
 	remote.Register("treeService", actor.PropsFromProducer(NewMyActor))
+	wg.Wait()
 
 	/*
 		props := actor.PropsFromProducer(func() actor.Actor {

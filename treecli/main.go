@@ -24,7 +24,7 @@ func (state *CliActor) Receive(context actor.Context) {
 		}
 
 	case *messages.Traverse:
-	case *messages.Error:
+	case *messages.ErrorResponse:
 	}
 }
 
@@ -54,8 +54,6 @@ func main() {
 	rootContext = actor.EmptyRootContext
 	pid = rootContext.Spawn(props)
 
-	message := &messages.Error{}
-
 	time.Sleep(5 * time.Second)
 
 	pidResp, err := remote.SpawnNamed(*flagRemote, "remote", "treeService", 5*time.Second)
@@ -63,10 +61,6 @@ func main() {
 		panic(err)
 	}
 	remotePid = pidResp.Pid
-
-	rootContext.RequestWithCustomSender(remotePid, message, pid)
-
-	wg.Wait()
 
 	switch flag.Args()[0] {
 	case "newtree":
@@ -98,10 +92,7 @@ func newTree() {
 		return
 	}
 
-	message := &messages.Error{}
-
-	rootContext.RequestWithCustomSender(remotePid, message, pid)
-	//rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_CREATE}, pid)
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.Usage_CREATE}, pid)
 	wg.Wait()
 }
 

@@ -1,6 +1,11 @@
 syntax = "proto3";
 package messages;
 
+
+message Error {
+}
+
+
 enum Usage {
     CREATE = 0;
     ADD = 1;
@@ -30,6 +35,4 @@ message Traverse {
     repeated Response Values = 1;
 }
 
-message ErrorResponse {
 
-}
