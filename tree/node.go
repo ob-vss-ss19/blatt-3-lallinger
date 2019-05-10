@@ -63,7 +63,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 				}
 			} else {
 				// return error key not found
-				context.Send(msg.Caller, &messages.Error{})
+				context.Send(msg.Caller, &messages.Error{Message: "Key not found"})
 			}
 		} else {
 			// undefined send error

@@ -84,7 +84,7 @@ func getPID(id int32, token string) *actor.PID {
 }
 
 func invalidAcess(pid *actor.PID) {
-	context.Send(pid, &messages.Error{})
+	context.Send(pid, &messages.Error{Message: "Id and token do not match or tree does not exist"})
 }
 
 func NewMyActor() actor.Actor {

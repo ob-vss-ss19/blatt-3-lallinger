@@ -28,8 +28,15 @@ func (state *CliActor) Receive(context actor.Context) {
 		}
 
 	case *messages.Traverse:
+		for i, pair := range msg.Values {
+			fmt.Printf("{%d,%s}", pair.Key, pair.Value)
+			if i+1 < len(msg.Values) {
+				fmt.Printf(",")
+			}
+		}
+		wg.Done()
 	case *messages.Error:
-		fmt.Printf("An error occured!\n")
+		fmt.Printf("%s\n", msg.Message)
 		wg.Done()
 	}
 }
@@ -93,12 +100,12 @@ func main() {
 }
 
 func newTree() {
-	if len(flag.Args()) > 1 {
+	if len(flag.Args()) != 2 {
 		printError()
 		return
 	}
-
-	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.CREATE}, pid)
+	tmp, _ := strconv.Atoi(flag.Args()[1])
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.CREATE, Id: int32(tmp)}, pid)
 	wg.Wait()
 }
 
