@@ -166,7 +166,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 				response[i] = &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE}
 			}
 			fmt.Println("send to caller")
-			context.Send(msg.Caller, messages.Traverse{Values: response})
+			context.Send(msg.Caller, &messages.Traverse{Values: response})
 		}
 
 	case *Delete:
