@@ -121,17 +121,16 @@ func (state *NodeActor) Receive(context actor.Context) {
 			msg.RemainingNodes = make([]*actor.PID, 1)
 			tmp := msg.Start
 			msg.Start = nil
-			if len(state.Values) != 0 && state.LeftNode == nil && state.RightNode == nil {
+			if state.LeftNode == nil && state.RightNode == nil {
 				// if root is leaf create slices and set start to nil
-				if tmp == nil {
-					fmt.Println("tmp is null")
-				}
+				fmt.Println("send to start")
 				context.Send(tmp, msg)
 				return
 			}
 
 			// if root is node create slices, set start to nil, add right node to remaining and forward
 			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
+			fmt.Println("send to left node from start")
 			context.Send(state.LeftNode, msg)
 			return
 		}
@@ -150,6 +149,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			}
 			next := msg.RemainingNodes[len(msg.RemainingNodes)-1]
 			msg.RemainingNodes = msg.RemainingNodes[:len(msg.RemainingNodes)-1]
+			fmt.Println("send to next node from leaf")
 			context.Send(next, msg)
 		}
 
@@ -165,6 +165,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			for i, pair := range msg.Values {
 				response[i] = &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE}
 			}
+			fmt.Println("send to caller")
 			context.Send(msg.Caller, messages.Traverse{Values: response})
 		}
 
