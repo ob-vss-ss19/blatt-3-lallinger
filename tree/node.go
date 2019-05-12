@@ -179,7 +179,8 @@ func (state *NodeActor) Receive(context actor.Context) {
 			context.Send(state.RightNode, &Delete{CurrentNode: state.RightNode})
 		}
 
-		context.Stop(msg.CurrentNode) // nolint
+		msg.CurrentNode.Stop()
+		//context.Stop(msg.CurrentNode) // nolint
 		fmt.Println("still running?")
 	}
 }
