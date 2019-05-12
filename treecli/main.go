@@ -23,8 +23,10 @@ func (state *CliActor) Receive(context actor.Context) {
 		case messages.CREATE:
 			fmt.Printf("Id: %d\n", msg.Key)
 			fmt.Printf("Token: %s\n", msg.Value)
+			wg.Done()
 		case messages.FIND:
 			fmt.Printf("Value: %s\n", msg.Value)
+			wg.Done()
 		case messages.TRAVERSE:
 			if !state.first {
 				fmt.Printf(", ")
@@ -34,17 +36,8 @@ func (state *CliActor) Receive(context actor.Context) {
 		case messages.SUCCESS:
 			state.first = true
 			fmt.Printf("Success")
+			wg.Done()
 		}
-		wg.Done()
-	case *messages.Traverse:
-		for i, pair := range msg.Values {
-			fmt.Printf("{%d,%s}", pair.Key, pair.Value)
-			if i+1 < len(msg.Values) {
-				fmt.Printf(",")
-			}
-		}
-		fmt.Printf("\n")
-		wg.Done()
 	case *messages.Error:
 		fmt.Printf("%s\n", msg.Message)
 		wg.Done()

@@ -145,6 +145,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 		if len(msg.RemainingNodes) != 0 && state.LeftNode == nil && state.RightNode == nil {
 			// leaf with remaining nodes to traverse
 			for key := range sortKeys(state.Values) {
+				fmt.Printf("appending %d\n", key)
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
 			next := msg.RemainingNodes[len(msg.RemainingNodes)-1]
@@ -156,11 +157,13 @@ func (state *NodeActor) Receive(context actor.Context) {
 		if len(msg.RemainingNodes) == 0 && state.LeftNode == nil && state.RightNode == nil {
 			// leaf with no remaining nodes to traverse
 			for key := range sortKeys(state.Values) {
+				fmt.Printf("appending %d in last leaf\n", key)
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
 
 			fmt.Println("send to caller")
 			for _, pair := range msg.Values {
+				fmt.Printf("sending key %d\n", pair.Key)
 				context.Send(msg.Caller, &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE})
 			}
 			context.Send(msg.Caller, &messages.Response{Type: messages.SUCCESS})
