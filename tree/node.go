@@ -59,14 +59,12 @@ func (state *NodeActor) Receive(context actor.Context) {
 					delete(state.Values, msg.Key)
 				} else {
 					// return value
-					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND})
+					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND, Key: int32(msg.Key)})
 				}
 			} else {
 				// return error key not found
 				context.Send(msg.Caller, &messages.Error{Message: "Key not found"})
 			}
-		} else {
-			// undefined send error
 		}
 	case *Add:
 		if len(state.Values) < state.LeafSize && state.LeftNode == nil && state.RightNode == nil {
@@ -100,10 +98,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			}
 
 			state.Values = nil
-		} else {
-			// undefined send error
 		}
-
 	case *Traverse:
 		if msg.Start != nil {
 			// set root node as start node for traverse

@@ -20,11 +20,12 @@ func (state *CliActor) Receive(context actor.Context) {
 	case *messages.Response:
 		switch msg.Type {
 		case messages.CREATE:
-			fmt.Printf("Token: %s\n", msg.Value)
 			fmt.Printf("Id: %d\n", msg.Key)
-			wg.Done()
+			fmt.Printf("Token: %s\n", msg.Value)
 		case messages.FIND:
-		case messages.TRAVERSE:
+			fmt.Printf("Value: %s\n", msg.Value)
+		case messages.SUCCESS:
+			fmt.Printf("Success")
 		}
 
 	case *messages.Traverse:
@@ -34,27 +35,30 @@ func (state *CliActor) Receive(context actor.Context) {
 				fmt.Printf(",")
 			}
 		}
-		wg.Done()
+		fmt.Printf("\n")
 	case *messages.Error:
 		fmt.Printf("%s\n", msg.Message)
-		wg.Done()
 	}
+	wg.Done()
 }
 
-var flagBind = flag.String("bind", "localhost:8092", "Bind to address")
+var (
+	flagBind   = flag.String("bind", "localhost:8092", "Bind to address")
+	flagRemote = flag.String("remote", "127.0.0.1:8091", "remote host:port")
 
-var flagRemote = flag.String("remote", "127.0.0.1:8091", "remote host:port")
+	id          *int
+	token       = flag.String("token", "", "tree token")
+	forceDelete = flag.Bool("no-preserve-tree", false, "force deletion of tree")
 
-var id = flag.Int("id", -1, "tree id")
-var token = flag.String("token", "", "tree token")
-var forceDelete = flag.Bool("no-preserve-tree", false, "force deletion of tree")
-
-var rootContext *actor.RootContext
-var pid *actor.PID
-var remotePid *actor.PID
-var wg sync.WaitGroup
+	rootContext *actor.RootContext
+	pid         *actor.PID
+	remotePid   *actor.PID
+	wg          sync.WaitGroup
+)
 
 func main() {
+
+	id = flag.Int("id", -1, "tree id")
 
 	flag.Parse()
 
@@ -74,6 +78,12 @@ func main() {
 		panic(err)
 	}
 	remotePid = pidResp.Pid
+
+	fmt.Printf("token: %s id: %d args: ", *token, *id)
+	for _, arg := range flag.Args() {
+		fmt.Printf("%s", arg)
+	}
+	fmt.Printf("\n")
 
 	switch flag.Args()[0] {
 	case "newtree":
@@ -97,6 +107,7 @@ func main() {
 	default:
 		printError()
 	}
+	wg.Wait()
 }
 
 func newTree() {
@@ -106,7 +117,6 @@ func newTree() {
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.CREATE, Id: int32(tmp)}, pid)
-	wg.Wait()
 }
 
 func insert() {
@@ -125,7 +135,6 @@ func search() {
 	}
 	tmp, _ := strconv.Atoi(flag.Args()[1])
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.FIND, Key: int32(tmp), Token: *token, Id: int32(*id)}, pid)
-	wg.Wait()
 }
 
 func remove() {
@@ -156,7 +165,6 @@ func traverse() {
 		return
 	}
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.TRAVERSE, Token: *token, Id: int32(*id)}, pid)
-	wg.Wait()
 }
 
 func printError() {

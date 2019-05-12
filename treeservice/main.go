@@ -69,10 +69,9 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				return
 			}
 			context.Send(pid, &tree.Delete{CurrentNode: pid})
-		default:
 		}
-	default: // just for linter
 	}
+
 }
 
 func getPID(id int32, token string) *actor.PID {
@@ -113,5 +112,6 @@ func nextId() int32 {
 func newToken() string {
 	b := make([]byte, 4)
 	rand.Read(b)
-	return fmt.Sprintf("%x", b)
+	return "a"
+	//return fmt.Sprintf("%x", b)
 }
