@@ -118,7 +118,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 		if msg.Start != nil {
 			// set root node as start node for traverse
 			msg.Values = make([]KeyValuePair, 0)
-			msg.RemainingNodes = make([]*actor.PID, 1)
+			msg.RemainingNodes = make([]*actor.PID, 0)
 			tmp := msg.Start
 			msg.Start = nil
 			if state.LeftNode == nil && state.RightNode == nil {
