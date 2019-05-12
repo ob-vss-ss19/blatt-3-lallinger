@@ -15,6 +15,7 @@ enum Usage {
     TRAVERSE = 4;
     DELETE = 5;
     SUCCESS = 6;
+    TREES = 7;
 }
 
 

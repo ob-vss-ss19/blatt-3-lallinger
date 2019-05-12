@@ -37,6 +37,8 @@ func (state *CliActor) Receive(context actor.Context) {
 			state.first = true
 			fmt.Printf("\nSuccess")
 			wg.Done()
+		case messages.TREES:
+			fmt.Printf("%s", msg.Value)
 		}
 	case *messages.Error:
 		fmt.Printf("%s\n", msg.Message)
@@ -100,11 +102,21 @@ func main() {
 		deleteTree()
 	case "traverse":
 		traverse()
+	case "trees":
+		trees()
 	default:
 		printError()
 		return
 	}
 	wg.Wait()
+}
+
+func trees() {
+	if len(flag.Args()) != 1 {
+		printError()
+		return
+	}
+	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.TREES}, pid)
 }
 
 func newTree() {
