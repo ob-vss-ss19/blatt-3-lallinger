@@ -123,6 +123,9 @@ func (state *NodeActor) Receive(context actor.Context) {
 			msg.Start = nil
 			if len(state.Values) != 0 && state.LeftNode == nil && state.RightNode == nil {
 				// if root is leaf create slices and set start to nil
+				if tmp == nil {
+					fmt.Println("tmp is null")
+				}
 				context.Send(tmp, msg)
 				return
 			}
