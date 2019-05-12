@@ -144,15 +144,17 @@ func remove() {
 }
 
 func deleteTree() {
-	if !*forceDelete {
-		fmt.Println("Specify no-preserve-tree for tree deletion")
-		return
-	}
-
 	if len(flag.Args()) > 1 || *id == -1 || *token == "" {
 		printError()
 		return
 	}
+
+	if !*forceDelete {
+		fmt.Println("Specify no-preserve-tree for tree deletion")
+		wg.Done()
+		return
+	}
+
 	rootContext.RequestWithCustomSender(remotePid, &messages.Request{Type: messages.DELETE, Token: *token, Id: int32(*id)}, pid)
 }
 

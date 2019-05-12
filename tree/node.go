@@ -135,7 +135,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			fmt.Println("send to left node from start")
 			context.Send(state.LeftNode, msg)
 			return
-		} else if len(msg.RemainingNodes) != 0 && len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
+		} else if len(msg.RemainingNodes) != 0 && state.LeftNode != nil && state.RightNode != nil {
 			// node is not leaf
 			// while remaining nodes add right node to remaining and send to left node
 			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
@@ -163,6 +163,9 @@ func (state *NodeActor) Receive(context actor.Context) {
 				context.Send(msg.Caller, &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE})
 			}
 			context.Send(msg.Caller, &messages.Response{Type: messages.SUCCESS})
+		} else {
+			fmt.Printf("error in traverse\n")
+			context.Send(msg.Caller, &messages.Error{"Error while traversing"})
 		}
 
 	case *Delete:
