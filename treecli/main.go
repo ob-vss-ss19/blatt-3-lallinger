@@ -13,6 +13,7 @@ import (
 )
 
 type CliActor struct {
+	first bool
 }
 
 func (state *CliActor) Receive(context actor.Context) {
@@ -24,7 +25,14 @@ func (state *CliActor) Receive(context actor.Context) {
 			fmt.Printf("Token: %s\n", msg.Value)
 		case messages.FIND:
 			fmt.Printf("Value: %s\n", msg.Value)
+		case messages.TRAVERSE:
+			if !state.first {
+				fmt.Printf(", ")
+			}
+			state.first = false
+			fmt.Printf("{%d,%s}", msg.Key, msg.Value)
 		case messages.SUCCESS:
+			state.first = true
 			fmt.Printf("Success")
 		}
 		wg.Done()
@@ -67,7 +75,7 @@ func main() {
 	remote.Start(*flagBind)
 	props := actor.PropsFromProducer(func() actor.Actor {
 		wg.Add(1)
-		return &CliActor{}
+		return &CliActor{true}
 	})
 	rootContext = actor.EmptyRootContext
 	pid = rootContext.Spawn(props)
