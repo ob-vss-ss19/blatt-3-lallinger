@@ -6,6 +6,10 @@ pipeline {
                 docker { image 'obraun/vss-protoactor-jenkins' }
             }
             steps {
+                sh 'go get github.com/AsynkronIT/protoactor-go/actor'
+                sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/messages'
+                sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/treecli'
+                sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/treeservice'
                 sh 'cd messages && make regenerate'
                 sh 'cd treeservice && go build main.go'
                 sh 'cd treecli && go build main.go'
