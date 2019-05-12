@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/messages"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/tree"
-	"reflect"
 	"sync"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -78,8 +77,15 @@ func (state *ServiceActor) Receive(context actor.Context) {
 			delete(trees, msg.Id)
 			context.Respond(&messages.Response{Type: messages.SUCCESS})
 		case messages.TREES:
-			keys := reflect.ValueOf(trees).MapKeys()
-			context.Respond(&messages.Response{Type: messages.TREES, Value: fmt.Sprintf("%v", keys)})
+			tmp := ""
+			for k := range trees {
+				tmp += fmt.Sprintf("%d", k) + ", "
+			}
+			if len(tmp) > 2 {
+				tmp = tmp[:len(tmp)-2]
+			}
+
+			context.Respond(&messages.Response{Type: messages.TREES, Value: tmp})
 		}
 	}
 

@@ -38,7 +38,8 @@ func (state *CliActor) Receive(context actor.Context) {
 			fmt.Printf("\nSuccess")
 			wg.Done()
 		case messages.TREES:
-			fmt.Printf("%s", msg.Value)
+			fmt.Printf("Tree IDs: %s\n", msg.Value)
+			wg.Done()
 		}
 	case *messages.Error:
 		fmt.Printf("%s\n", msg.Message)
