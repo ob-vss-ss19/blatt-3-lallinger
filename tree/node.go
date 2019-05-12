@@ -135,9 +135,10 @@ func (state *NodeActor) Receive(context actor.Context) {
 			fmt.Println("send to left node from start")
 			context.Send(state.LeftNode, msg)
 			return
-		} else if len(msg.RemainingNodes) != 0 && state.LeftNode != nil && state.RightNode != nil {
+		} else if state.LeftNode != nil && state.RightNode != nil {
 			// node is not leaf
 			// while remaining nodes add right node to remaining and send to left node
+			fmt.Printf("add right node send to left")
 			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
 			context.Send(state.LeftNode, msg)
 		} else if len(msg.RemainingNodes) != 0 && state.LeftNode == nil && state.RightNode == nil {
