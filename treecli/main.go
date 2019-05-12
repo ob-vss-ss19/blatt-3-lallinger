@@ -27,7 +27,7 @@ func (state *CliActor) Receive(context actor.Context) {
 		case messages.SUCCESS:
 			fmt.Printf("Success")
 		}
-
+		wg.Done()
 	case *messages.Traverse:
 		for i, pair := range msg.Values {
 			fmt.Printf("{%d,%s}", pair.Key, pair.Value)
@@ -36,15 +36,17 @@ func (state *CliActor) Receive(context actor.Context) {
 			}
 		}
 		fmt.Printf("\n")
+		wg.Done()
 	case *messages.Error:
 		fmt.Printf("%s\n", msg.Message)
+		wg.Done()
 	}
-	wg.Done()
+
 }
 
 var (
 	flagBind   = flag.String("bind", "localhost:8092", "Bind to address")
-	flagRemote = flag.String("remote", "127.0.0.1:8091", "remote host:port")
+	flagRemote = flag.String("remote", "127.0.0.1:8093", "remote host:port")
 
 	id          *int
 	token       = flag.String("token", "", "tree token")
@@ -63,7 +65,6 @@ func main() {
 	flag.Parse()
 
 	remote.Start(*flagBind)
-
 	props := actor.PropsFromProducer(func() actor.Actor {
 		wg.Add(1)
 		return &CliActor{}
@@ -81,31 +82,26 @@ func main() {
 
 	fmt.Printf("token: %s id: %d args: ", *token, *id)
 	for _, arg := range flag.Args() {
-		fmt.Printf("%s", arg)
+		fmt.Printf("%s ", arg)
 	}
 	fmt.Printf("\n")
 
 	switch flag.Args()[0] {
 	case "newtree":
 		newTree()
-		return
 	case "insert":
 		insert()
-		return
 	case "search":
 		search()
-		return
 	case "remove":
 		remove()
-		return
 	case "delete":
 		deleteTree()
-		return
 	case "traverse":
 		traverse()
-		return
 	default:
 		printError()
+		return
 	}
 	wg.Wait()
 }
@@ -169,4 +165,5 @@ func traverse() {
 
 func printError() {
 	fmt.Println("Invalid arguments")
+	wg.Done()
 }

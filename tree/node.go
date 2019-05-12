@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -57,9 +58,11 @@ func (state *NodeActor) Receive(context actor.Context) {
 			if tmp != "" {
 				if msg.Remove {
 					delete(state.Values, msg.Key)
+					fmt.Println("deleted key")
 				} else {
 					// return value
 					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND, Key: int32(msg.Key)})
+					fmt.Println("found key")
 				}
 			} else {
 				// return error key not found
@@ -73,16 +76,26 @@ func (state *NodeActor) Receive(context actor.Context) {
 				state.Values = make(map[int]string)
 			}
 			state.Values[msg.Key] = msg.Value
+			fmt.Println("added key")
 
 		} else if len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
 			// not a leaf
 			if msg.Key <= state.LeftMaxKey {
 				// add left
+				context.Send(state.LeftNode, msg)
 			} else {
 				// add right
+				context.Send(state.RightNode, msg)
 			}
 		} else if len(state.Values) == state.LeafSize && state.LeftNode == nil && state.RightNode == nil {
 			// leaf full create new leafs
+			fmt.Println("created new leafs")
+			props := actor.PropsFromProducer(func() actor.Actor {
+				return &NodeActor{LeafSize: int(state.LeafSize)}
+			})
+			state.LeftNode = context.Spawn(props)
+
+			state.RightNode = context.Spawn(props)
 
 			// send values to leafs
 			state.Values[msg.Key] = msg.Value
@@ -92,12 +105,14 @@ func (state *NodeActor) Receive(context actor.Context) {
 			for key := range keys {
 				if key <= state.LeftMaxKey {
 					// add half left
+					context.Send(state.LeftNode, &Add{Key: key, Value: state.Values[key]})
+					delete(state.Values, key)
 				} else {
 					// add half right
+					context.Send(state.RightNode, &Add{Key: key, Value: state.Values[key]})
+					delete(state.Values, key)
 				}
 			}
-
-			state.Values = nil
 		}
 	case *Traverse:
 		if msg.Start != nil {

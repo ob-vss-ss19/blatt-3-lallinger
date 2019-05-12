@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"flag"
 	"fmt"
 	"github.com/ob-vss-ss19/blatt-3-lallinger/messages"
@@ -41,6 +40,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				return
 			}
 			context.Send(pid, &tree.Add{Key: int(msg.Key), Value: msg.Value})
+			context.Respond(&messages.Response{Type: messages.SUCCESS})
 		case messages.FIND:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
@@ -55,6 +55,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				return
 			}
 			context.Send(pid, &tree.Find{Key: int(msg.Key), Remove: true})
+			context.Respond(&messages.Response{Type: messages.SUCCESS})
 		case messages.TRAVERSE:
 			pid := getPID(msg.Id, msg.Token)
 			if pid == nil {
@@ -69,6 +70,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				return
 			}
 			context.Send(pid, &tree.Delete{CurrentNode: pid})
+			context.Respond(&messages.Response{Type: messages.SUCCESS})
 		}
 	}
 
@@ -92,17 +94,18 @@ func NewMyActor() actor.Actor {
 }
 
 // nolint:gochecknoglobals
-var flagBind = flag.String("bind", "localhost:8091", "Bind to address")
+var flagBind = flag.String("bind", "localhost:8093", "Bind to address")
 
 func main() {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
+	defer wg.Wait()
 
 	flag.Parse()
 	remote.Start(*flagBind)
 	remote.Register("treeService", actor.PropsFromProducer(NewMyActor))
-	wg.Wait()
+
 }
 
 func nextId() int32 {
@@ -110,8 +113,8 @@ func nextId() int32 {
 }
 
 func newToken() string {
-	b := make([]byte, 4)
-	rand.Read(b)
+	//b := make([]byte, 4)
+	//rand.Read(b)
 	return "a"
 	//return fmt.Sprintf("%x", b)
 }
