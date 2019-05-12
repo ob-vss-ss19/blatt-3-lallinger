@@ -171,8 +171,14 @@ func (state *NodeActor) Receive(context actor.Context) {
 
 	case *Delete:
 		fmt.Println("stopping node")
-		context.Send(state.LeftNode, &Delete{CurrentNode: state.LeftNode})
-		context.Send(state.RightNode, &Delete{CurrentNode: state.RightNode})
+		if state.LeftNode != nil {
+			context.Send(state.LeftNode, &Delete{CurrentNode: state.LeftNode})
+		}
+
+		if state.RightNode != nil {
+			context.Send(state.RightNode, &Delete{CurrentNode: state.RightNode})
+		}
+
 		context.Stop(msg.CurrentNode)
 		fmt.Println("still running?")
 	}
