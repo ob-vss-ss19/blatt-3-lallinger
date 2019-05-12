@@ -159,13 +159,11 @@ func (state *NodeActor) Receive(context actor.Context) {
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
 
-			response := make([]*messages.Response, 0)
-
-			for _, pair := range msg.Values {
-				response = append(response, &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE})
-			}
 			fmt.Println("send to caller")
-			context.Send(msg.Caller, &messages.Traverse{Values: response})
+			for _, pair := range msg.Values {
+				context.Send(msg.Caller, &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE})
+			}
+			context.Send(msg.Caller, &messages.Response{Type: messages.SUCCESS})
 		}
 
 	case *Delete:

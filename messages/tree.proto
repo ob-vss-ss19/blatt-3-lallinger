@@ -33,9 +33,4 @@ message Response {
 }
 
 
-message Traverse {
-    repeated Response Values = 1;
-}
-
-
 
