@@ -101,14 +101,16 @@ func (state *NodeActor) Receive(context actor.Context) {
 			state.Values[msg.Key] = msg.Value
 			keys := sortKeys(state.Values)
 			state.LeftMaxKey = keys[(len(keys)/2)-1]
-
-			for key := range keys {
+			fmt.Printf("left max key %d\n", state.LeftMaxKey)
+			for _, key := range keys {
 				if key <= state.LeftMaxKey {
 					// add half left
+					fmt.Printf("send %d left\n", key)
 					context.Send(state.LeftNode, &Add{Key: key, Value: state.Values[key]})
 					delete(state.Values, key)
 				} else {
 					// add half right
+					fmt.Printf("send %d right\n", key)
 					context.Send(state.RightNode, &Add{Key: key, Value: state.Values[key]})
 					delete(state.Values, key)
 				}

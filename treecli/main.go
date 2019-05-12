@@ -35,7 +35,7 @@ func (state *CliActor) Receive(context actor.Context) {
 			fmt.Printf("{%d,%s}", msg.Key, msg.Value)
 		case messages.SUCCESS:
 			state.first = true
-			fmt.Printf("Success")
+			fmt.Printf("\nSuccess")
 			wg.Done()
 		}
 	case *messages.Error:
