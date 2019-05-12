@@ -70,6 +70,7 @@ func (state *ServiceActor) Receive(context actor.Context) {
 				return
 			}
 			context.Send(pid, &tree.Delete{CurrentNode: pid})
+			delete(trees, msg.Id)
 			context.Respond(&messages.Response{Type: messages.SUCCESS})
 		}
 	}
