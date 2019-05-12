@@ -144,7 +144,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 
 		if len(msg.RemainingNodes) != 0 && state.LeftNode == nil && state.RightNode == nil {
 			// leaf with remaining nodes to traverse
-			for key := range sortKeys(state.Values) {
+			for _, key := range sortKeys(state.Values) {
 				fmt.Printf("appending %d\n", key)
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
@@ -156,7 +156,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 
 		if len(msg.RemainingNodes) == 0 && state.LeftNode == nil && state.RightNode == nil {
 			// leaf with no remaining nodes to traverse
-			for key := range sortKeys(state.Values) {
+			for _, key := range sortKeys(state.Values) {
 				fmt.Printf("appending %d in last leaf\n", key)
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
