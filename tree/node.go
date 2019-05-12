@@ -70,13 +70,13 @@ func (state *NodeActor) Receive(context actor.Context) {
 			}
 		}
 	case *Add:
-		if len(state.Values) < state.LeafSize && state.LeftNode == nil && state.RightNode == nil {
+		if (len(state.Values) < state.LeafSize || state.Values[msg.Key] != "") && state.LeftNode == nil && state.RightNode == nil {
 			// add key to leaf
 			if state.Values == nil {
 				state.Values = make(map[int]string)
 			}
 			state.Values[msg.Key] = msg.Value
-			fmt.Println("added key")
+			fmt.Printf("added key: %d\n", msg.Key)
 
 		} else if len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
 			// not a leaf
@@ -135,7 +135,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 
 		if len(msg.RemainingNodes) != 0 && len(state.Values) == 0 && state.LeftNode != nil && state.RightNode != nil {
 			// node is not leaf
-			// while remaining nodes add right node to remaining and sends to left node
+			// while remaining nodes add right node to remaining and send to left node
 			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
 			context.Send(state.LeftNode, msg)
 		}
@@ -146,7 +146,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
 			next := msg.RemainingNodes[len(msg.RemainingNodes)-1]
-			msg.RemainingNodes = msg.RemainingNodes[:len(msg.RemainingNodes)-2]
+			msg.RemainingNodes = msg.RemainingNodes[:len(msg.RemainingNodes)-1]
 			context.Send(next, msg)
 		}
 
