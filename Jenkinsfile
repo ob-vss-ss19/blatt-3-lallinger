@@ -7,7 +7,6 @@ pipeline {
             }
             steps {
                 sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/messages'
-                sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/tree'
                 sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/treecli'
                 sh 'go get github.com/ob-vss-ss19/blatt-3-lallinger/treeserver'
                 sh 'cd messages && make regenerate'
