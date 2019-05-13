@@ -50,8 +50,8 @@ func createRandValues() {
 
 	pairs := make(map[int]string)
 
-	for i := 0; i < 5; i++ {
-		pairs[int(mr.Int31n(1000))] = newToken()
+	for i := 0; i < 100000; i++ {
+		pairs[int(mr.Int31n(100000))] = newToken()
 	}
 
 	for _, v := range sortKeys(pairs) {
