@@ -35,7 +35,7 @@ func (state *CliActor) Receive(context actor.Context) {
 			fmt.Printf("{%d,%s}", msg.Key, msg.Value)
 		case messages.SUCCESS:
 			state.first = true
-			fmt.Printf("\nSuccess")
+			// fmt.Printf("\nSuccess")
 			wg.Done()
 		case messages.TREES:
 			fmt.Printf("Tree IDs: %s\n", msg.Value)
@@ -66,6 +66,34 @@ func main() {
 
 	id = flag.Int("id", -1, "tree id")
 
+	origUsage := flag.Usage
+
+	flag.Usage = func() {
+		fmt.Println("treecli [FLAGS] COMMAND [KEY/SIZE] [VALUE]")
+		fmt.Println("FLAGS")
+		origUsage()
+		fmt.Println()
+		fmt.Println("COMMAND")
+		fmt.Println("  newtree SIZE")
+		fmt.Println("	Creates new tree. SIZE parameter specifies leaf size (minimum 1). Returns id and token")
+		fmt.Println("  insert KEY VALUE")
+		fmt.Println("	Insert an integer KEY with given string VALUE into the tree. id and token flag must be specified")
+		fmt.Println("  search KEY")
+		fmt.Println("	Search the tree for KEY. Returns corresponding value if found. id and token flag must be specified")
+		fmt.Println("  remove KEY")
+		fmt.Println("	Removes the KEY from the tree. id and token flag must be specified")
+		fmt.Println("  traverse")
+		fmt.Println("	gets all keys and values in the tree sorted by keys. id and token flag must be specified")
+		fmt.Println("  trees")
+		fmt.Println("	Gets a list of all available tree ids")
+		fmt.Println("  delete")
+		fmt.Println("	Deletes the tree. id and token flag must be specified, also no-preserve-tree flag must be set to true")
+		fmt.Println("")
+		fmt.Println("Example:")
+		fmt.Println("  newtree 2")
+		fmt.Println("  --id=0 --token=d57a23df insert 42 'the answer'")
+	}
+
 	flag.Parse()
 
 	remote.Start(*flagBind)
@@ -83,12 +111,6 @@ func main() {
 		panic(err)
 	}
 	remotePid = pidResp.Pid
-
-	fmt.Printf("token: %s id: %d args: ", *token, *id)
-	for _, arg := range flag.Args() {
-		fmt.Printf("%s ", arg)
-	}
-	fmt.Printf("\n")
 
 	switch flag.Args()[0] {
 	case "newtree":
@@ -180,6 +202,6 @@ func traverse() {
 }
 
 func printError() {
-	fmt.Println("Invalid arguments")
+	flag.Usage()
 	wg.Done()
 }

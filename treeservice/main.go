@@ -25,6 +25,10 @@ func (state *ServiceActor) Receive(context actor.Context) {
 	case *messages.Request:
 		switch msg.Type {
 		case messages.CREATE:
+			if msg.Id < 1 {
+				context.Respond(&messages.Error{"Minimum leaf size is 1!"})
+				return
+			}
 			id := int32(state.nextID)
 			state.nextID++
 			token := newToken()
