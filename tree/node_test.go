@@ -17,7 +17,7 @@ type TestActor struct {
 	indices []int
 }
 
-var values = make([]KeyValuePair, 0) //[]KeyValuePair{{-6, "minus sechs"}, {-3, "minus 3"}, {0, "null"}, {1, "eins"}, {3, "drei"}, {6, "sechs"}}
+var values = make([]KeyValuePair, 0)
 
 func (state *TestActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
@@ -51,7 +51,7 @@ func createRandValues() {
 	pairs := make(map[int]string)
 
 	for i := 0; i < 100000; i++ {
-		pairs[int(mr.Int31n(100000))] = newToken()
+		pairs[int(mr.Int31n(1000000))] = newToken()
 	}
 
 	for _, v := range sortKeys(pairs) {
