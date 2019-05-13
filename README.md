@@ -78,13 +78,13 @@
     ```
     cd blatt-3-lallinger/treeservice
     go build
-    ./treeservice &
+    ./treeservice
     ```    
 -   Standardmäßig wird zum binden `localhost: 8093` verwendet, dies kann über `--bind` geändert werden.
 
--   Compilieren und Starten der treecli in zweitem Terminal:
+-   Compilieren und Starten der treecli in einem zweiten Terminal:
     ```
-    cd ../treecli
+    cd blatt-3-lallinger/treecli
     go build
     ./treecli trees
     ```    
