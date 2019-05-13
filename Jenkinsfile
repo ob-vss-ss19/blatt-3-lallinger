@@ -21,6 +21,7 @@ pipeline {
             }
             steps {
                 sh 'echo run tests...'
+                sh 'cd tree && go test'
             }
         }
         stage('Lint') {

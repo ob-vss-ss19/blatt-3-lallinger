@@ -58,7 +58,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			if tmp != "" {
 				if msg.Remove {
 					delete(state.Values, msg.Key)
-					fmt.Println("deleted key")
+					fmt.Printf("deleted key %d\n", msg.Key)
 				} else {
 					// return value
 					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND, Key: int32(msg.Key)})
@@ -138,7 +138,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 		} else if state.LeftNode != nil && state.RightNode != nil {
 			// node is not leaf
 			// while remaining nodes add right node to remaining and send to left node
-			fmt.Printf("add right node send to left")
+			fmt.Printf("add right node send to left\n")
 			msg.RemainingNodes = append(msg.RemainingNodes, state.RightNode)
 			context.Send(state.LeftNode, msg)
 		} else if len(msg.RemainingNodes) != 0 && state.LeftNode == nil && state.RightNode == nil {
@@ -158,12 +158,13 @@ func (state *NodeActor) Receive(context actor.Context) {
 				msg.Values = append(msg.Values, KeyValuePair{key, state.Values[key]})
 			}
 
+			respon := make([]*messages.Response, 0)
+
 			fmt.Println("send to caller")
 			for _, pair := range msg.Values {
-				fmt.Printf("sending key %d\n", pair.Key)
-				context.Send(msg.Caller, &messages.Response{Value: pair.Value, Key: int32(pair.Key), Type: messages.TRAVERSE})
+				respon = append(respon, &messages.Response{Value: pair.Value, Key: int32(pair.Key)})
 			}
-			context.Send(msg.Caller, &messages.Response{Type: messages.SUCCESS})
+			context.Send(msg.Caller, &messages.Traverse{Values: respon})
 		} else {
 			fmt.Printf("error in traverse\n")
 			context.Send(msg.Caller, &messages.Error{"Error while traversing"})
@@ -179,8 +180,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 			context.Send(state.RightNode, &Delete{CurrentNode: state.RightNode})
 		}
 
-		msg.CurrentNode.Stop()
-		//context.Stop(msg.CurrentNode) // nolint
+		context.Stop(msg.CurrentNode)
 		fmt.Println("still running?")
 	}
 }
