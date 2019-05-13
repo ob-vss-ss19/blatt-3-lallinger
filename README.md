@@ -71,22 +71,22 @@
 
 -   Herunterladen des Repositorys:
     ```
-    git pull https://github.com/ob-vss-ss19/blatt-3-lallinger
+    git clone https://github.com/ob-vss-ss19/blatt-3-lallinger
     ```
     
 -   Compilieren und Starten des treeservice:
     ```
-    cd treeservice
+    cd blatt-3-lallinger/treeservice
     go build
-    treeservice.exe
+    ./treeservice &
     ```    
 -   Standardmäßig wird zum binden `localhost: 8093` verwendet, dies kann über `--bind` geändert werden.
 
--   Compilieren und Starten der treecli:
+-   Compilieren und Starten der treecli in zweitem Terminal:
     ```
-    cd treecli
+    cd ../treecli
     go build
-    treecli.exe trees
+    ./treecli trees
     ```    
 -   Standardmäßig wird zum binden `localhost: 8092` verwendet, dies kann über `--bind` geändert werden.
 
