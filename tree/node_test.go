@@ -17,6 +17,9 @@ type TestActor struct {
 	indices []int
 }
 
+const LEAFS = 5
+const NUMBEROFVALUES = 100000
+
 var values = make([]KeyValuePair, 0)
 
 func (state *TestActor) Receive(context actor.Context) {
@@ -50,8 +53,8 @@ func createRandValues() {
 
 	pairs := make(map[int]string)
 
-	for i := 0; i < 100000; i++ {
-		pairs[int(mr.Int31n(1000000))] = newToken()
+	for i := 0; i < NUMBEROFVALUES; i++ {
+		pairs[int(mr.Int31n(NUMBEROFVALUES*10))] = newToken()
 	}
 
 	for _, v := range sortKeys(pairs) {
@@ -64,7 +67,7 @@ func TestAdd(t *testing.T) {
 	createRandValues()
 	context := actor.EmptyRootContext
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return &NodeActor{LeafSize: 1}
+		return &NodeActor{LeafSize: LEAFS}
 	})
 	tree := context.Spawn(props)
 	var wg sync.WaitGroup
@@ -92,7 +95,7 @@ func TestDelete(t *testing.T) {
 
 	context := actor.EmptyRootContext
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return &NodeActor{LeafSize: 2}
+		return &NodeActor{LeafSize: LEAFS}
 	})
 	tree := context.Spawn(props)
 	var wg sync.WaitGroup
@@ -129,7 +132,7 @@ func TestFind(t *testing.T) {
 
 	context := actor.EmptyRootContext
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return &NodeActor{LeafSize: 2}
+		return &NodeActor{LeafSize: LEAFS}
 	})
 	tree := context.Spawn(props)
 	var wg sync.WaitGroup
