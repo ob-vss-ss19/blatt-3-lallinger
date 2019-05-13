@@ -33,5 +33,9 @@ message Response {
     Usage Type = 3;
 }
 
+message Traverse {
+    repeated Response Values = 1;
+}
+
 
 

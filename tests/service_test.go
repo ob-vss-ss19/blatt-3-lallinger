@@ -7,3 +7,5 @@ func TestTreeAdd(t *testing.T) {
 	a := tree.Traverse{}
 	a.Values = make([]tree.KeyValuePair, 0)
 }
+
+func addPair()
