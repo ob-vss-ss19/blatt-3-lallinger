@@ -62,7 +62,7 @@ func (state *NodeActor) Receive(context actor.Context) {
 				} else {
 					// return value
 					context.Send(msg.Caller, &messages.Response{Value: tmp, Type: messages.FIND, Key: int32(msg.Key)})
-					fmt.Println("found key")
+					fmt.Printf("found key %d", msg.Key)
 				}
 			} else {
 				// return error key not found
