@@ -18,7 +18,7 @@ type TestActor struct {
 }
 
 const LEAFS = 5
-const NUMBEROFVALUES = 100000
+const NUMBEROFVALUES = 10000
 
 var values = make([]KeyValuePair, 0)
 
